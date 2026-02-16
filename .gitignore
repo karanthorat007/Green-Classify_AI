@@ -14,7 +14,7 @@ env/
 dataset/
 
 # Model files
-*.h5
+# *.h5   # tracked via Git LFS
 *.keras
 *.pt
 *.pth
