@@ -1,12 +1,25 @@
- Vegetable Classifier Model
+ 🌿 Green Classify AI — Vegetable Image Classification System 
 
-This project is a deep learning model to classify vegetables using CNN.
+Green Classify is a deep learning based web application that predicts the type of vegetable from an uploaded image.
+The model is trained using TensorFlow/Keras and deployed using Flask.
 
- Project Structure
-- app.py
-- vegetable_classifier_model.h5
-- static/
-- templates/
+This project demonstrates an end-to-end ML workflow:
+Data preprocessing → Model training → Evaluation → Web deployment
+
+
+📁 Project Structure
+
+Green-Classify-AI/
+│
+├── app.py
+├── requirements.txt
+├── vegetable_classifier_model.h5
+├── static/
+├── templates/
+├── 01_data_analysis_preprocessing.ipynb
+├── 02_model_evaluation_testing.ipynb
+└── .gitignore
+
 
  How to Run
 1. Install requirements:
