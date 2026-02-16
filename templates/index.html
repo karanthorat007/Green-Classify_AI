@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="{% if prediction or image_path %}no-smooth{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <title>GreenClassify</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="theme-vibrant">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">
+        <img class="logo-mark" src="{{ url_for('static', filename='vibrant-green.avif') }}" alt="Leaf">
+        GreenClassify
+    </div>
+    <div class="links">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#predict">Prediction</a>
+    </div>
+    <div class="nav-controls">
+        <div class="toggle theme-toggle" aria-label="Theme switcher">
+            <button type="button" class="toggle-btn theme-btn active" data-theme="vibrant">Vibrant</button>
+            <button type="button" class="toggle-btn theme-btn" data-theme="minimal">Minimal</button>
+        </div>
+    </div>
+</nav>
+
+<!-- HOME SECTION -->
+<section id="home" class="section hero">
+    <div class="hero-content">
+        <div class="hero-kicker">CNN-powered vegetable recognition</div>
+        <h1>Identify Vegetables in Seconds</h1>
+        <p>Upload a photo and get a clear, accurate prediction across 15 common vegetables.</p>
+        <div class="hero-actions">
+            <a href="#predict" class="btn">Start Prediction</a>
+            <a href="#about" class="btn secondary">See Supported Vegetables</a>
+        </div>
+        <div class="hero-meta">
+            <span>CNN-based classifier</span>
+            <span>224x224 image input</span>
+            <span>15 vegetable classes</span>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="section light">
+    <div class="card about-card">
+        <div class="about-grid">
+            <div class="about-copy">
+                <h2>About GreenClassify</h2>
+                <p>
+                    GreenClassify is a deep learning based vegetable image classification system
+                    built with CNN models. It helps identify vegetables from images accurately and
+                    efficiently for learning, demos, and lightweight real-world workflows. We are
+                    inspired by modern pipelines that pair CNN classification with YOLO-based
+                    detection for live camera feeds, making the system ready for future upgrades.
+                </p>
+                <p>
+                    Use clear, well-lit images and keep the vegetable centered for the best results.
+                    The model currently supports 15 vegetable categories (listed here).
+                </p>
+                <ul class="about-list">
+                    <li>Image upload with instant preview</li>
+                    <li>TensorFlow-powered inference</li>
+                    <li>Detection-ready roadmap with YOLO concepts</li>
+                </ul>
+                <div class="contact-card">
+                    <h3>Contact</h3>
+                    <p>Email: support@greenclassify.com</p>
+                </div>
+            </div>
+            <div class="about-panel">
+                <h3>Supported Vegetables</h3>
+                <div class="chips">
+                    <span class="chip">Bean</span>
+                    <span class="chip">Bitter Gourd</span>
+                    <span class="chip">Bottle Gourd</span>
+                    <span class="chip">Brinjal</span>
+                    <span class="chip">Broccoli</span>
+                    <span class="chip">Cabbage</span>
+                    <span class="chip">Capsicum</span>
+                    <span class="chip">Carrot</span>
+                    <span class="chip">Cauliflower</span>
+                    <span class="chip">Cucumber</span>
+                    <span class="chip">Papaya</span>
+                    <span class="chip">Potato</span>
+                    <span class="chip">Pumpkin</span>
+                    <span class="chip">Radish</span>
+                    <span class="chip">Tomato</span>
+                </div>
+                <div class="about-note">
+                    Tip: single-object images work best. Avoid heavy shadows and cluttered backgrounds.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PREDICTION SECTION -->
+<section id="predict" class="section">
+    <div class="card {% if image_path or prediction %}wide{% endif %}">
+        <div class="pred-head">
+            <h2>Upload a Vegetable Image</h2>
+            <p>PNG or JPG works best. Keep the vegetable centered and in focus.</p>
+        </div>
+
+        <div class="pred-wrap {% if image_path or prediction %}two-column{% endif %}">
+
+            <div class="col upload-col">
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      action="{{ url_for('index') }}#predict"
+                      onsubmit="showLoader()">
+
+                    <!-- Upload box -->
+                    <div class="upload-box">
+                        <input type="file" name="file" id="fileInput" accept="image/*" required hidden>
+
+                        <label for="fileInput" class="upload-btn">Choose Image</label>
+
+                        <p class="file-name" id="fileName">{% if image_path %}{{ image_path.split('/')[-1] }}{% else %}No file selected{% endif %}</p>
+
+                        <!-- Preview before predict -->
+                        <img id="localPreview" class="preview-small {% if not image_path %}hidden{% endif %}" {% if image_path %}src="{{ image_path }}"{% endif %}>
+                    </div>
+
+                    <br>
+
+                    <button type="submit" class="btn" id="predictBtn">
+                        <span id="btnText">Predict</span>
+                        <span class="spinner" id="spinner"></span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col result-col">
+                {% if image_path %}
+                    <img src="{{ image_path }}" class="preview hover-image">
+                {% endif %}
+
+                {% if prediction %}
+                    <div class="toggle lang-toggle" aria-label="Language switcher">
+                        <button type="button" class="toggle-btn lang-btn active" data-lang="en">English</button>
+                        <button type="button" class="toggle-btn lang-btn" data-lang="hi">Hindi</button>
+                    </div>
+                    <h3 class="prediction-text">This is <span id="predictionName" data-en="{{ prediction_en }}" data-hi="{{ prediction_hi }}">{{ prediction_en }}</span></h3>
+                {% elif confidence is not none and not is_vegetable %}
+                    <h3 class="not-veg">This is not a vegetable.</h3>
+                    <p class="not-veg-sub">Try a clear, close-up photo of a single vegetable.</p>
+                {% endif %}
+
+                {% if confidence is not none and is_vegetable %}
+                    <div class="accuracy-card">
+                        <div>
+                            <div class="accuracy-label">Accuracy (Confidence)</div>
+                            <div class="accuracy-value">{{ (confidence * 100) | round(1) }}%</div>
+                        </div>
+                        <div class="accuracy-note">Based on the model's highest probability score.</div>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <span>GreenClassify</span>
+            <p>Smart vegetable recognition with deep learning.</p>
+        </div>
+        <div class="footer-contact">
+            <div>Email: support@greenclassify.com</div>
+            <div>Phone: +1 (415) 555-0198</div>
+        </div>
+    </div>
+</footer>
+
+<script>
+function showLoader() {
+    document.getElementById("btnText").innerText = "Predicting...";
+    document.getElementById("spinner").style.display = "inline-block";
+    document.getElementById("predictBtn").classList.add("loading");
+}
+
+/* Preview selected image */
+const fileInput = document.getElementById("fileInput");
+const fileName = document.getElementById("fileName");
+const preview = document.getElementById("localPreview");
+
+fileInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+        fileName.innerText = file.name;
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    } else {
+        fileName.innerText = "No file selected";
+        preview.style.display = "none";
+    }
+});
+
+const predictionName = document.getElementById("predictionName");
+const langButtons = document.querySelectorAll(".lang-btn");
+
+function setLanguage(lang) {
+    if (!predictionName) {
+        return;
+    }
+    const value = predictionName.dataset[lang];
+    if (!value) {
+        return;
+    }
+    predictionName.textContent = value;
+    langButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.lang === lang);
+    });
+    localStorage.setItem("greenclassify_lang", lang);
+}
+
+langButtons.forEach(btn => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+});
+
+const themeButtons = document.querySelectorAll(".theme-btn");
+const body = document.body;
+
+function applyTheme(theme) {
+    body.classList.remove("theme-vibrant", "theme-minimal");
+    body.classList.add(`theme-${theme}`);
+    themeButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.theme === theme);
+    });
+    localStorage.setItem("greenclassify_theme", theme);
+}
+
+themeButtons.forEach(btn => {
+    btn.addEventListener("click", () => applyTheme(btn.dataset.theme));
+});
+
+const savedTheme = localStorage.getItem("greenclassify_theme") || "vibrant";
+applyTheme(savedTheme);
+
+const savedLang = localStorage.getItem("greenclassify_lang") || "en";
+setLanguage(savedLang);
+</script>
+
+</body>
+</html>
